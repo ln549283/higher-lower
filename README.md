@@ -11,9 +11,10 @@ MVP mobile-first d'un jeu de comparaison **Higher / Lower**.
 - Chaque question peut être signalée depuis l'interface.
 
 ## Contenu
-- **240 comparaisons** incluses dans `src/data/questions.json`.
-- Les questions sont séparées du moteur de jeu pour pouvoir les corriger facilement.
-- Les données susceptibles d'évoluer dans le temps doivent être revérifiées avant publication.
+- **240 comparaisons** générées depuis `src/data/questions.js`.
+- Banque équilibrée entre plusieurs catégories : géographie, sciences, animaux et technologie.
+- Les données sont séparées du moteur de jeu pour pouvoir être corrigées facilement.
+- Les valeurs susceptibles d'évoluer ou d'être discutées doivent être revérifiées avant publication Store.
 
 ## Lancer le jeu
 ```bash
