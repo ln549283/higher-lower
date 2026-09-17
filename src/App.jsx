@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ArrowLeft, ArrowRight, BarChart3, Check, Download, Flag, RotateCcw, Trophy, X } from 'lucide-react'
 import questions from './data/questions.js'
+import { maybeShowDefeatAd, warmUpAds } from './ads.js'
+
+const APP_VERSION = '1.0.0'
 
 function shuffle(items) {
   const copy = [...items]
@@ -116,6 +119,7 @@ function App() {
   }
 
   function startGame() {
+    void warmUpAds()
     setDeck(buildDeck(questions))
     setIndex(0)
     setStreak(0)
@@ -172,9 +176,10 @@ function App() {
     setStats(current => ({ ...current, games: current.games + 1, streakTotal: current.streakTotal + streak }))
   }
 
-  function continueGame() {
+  async function continueGame() {
     if (feedback === 'wrong') {
       finishGame()
+      await maybeShowDefeatAd()
       setScreen('gameover')
       setFeedback(null)
       setChosenSide(null)
@@ -252,7 +257,7 @@ function App() {
         {screen === 'home' && (
           <div className="home-screen home-native">
             <header className="home-top">
-              <div className="mini-brand">H/L</div>
+              <div className="mini-brand">W</div>
               <div className="home-actions">
                 {installPrompt && <button className="icon-button" onClick={installApp} aria-label="Installer"><Download size={19}/></button>}
                 <button className="icon-button" onClick={() => setScreen('stats')} aria-label="Statistiques"><BarChart3 size={19}/></button>
@@ -261,14 +266,14 @@ function App() {
 
             <div className="home-center">
               <div className="app-badge">COMPARE · APPRENDS · ENCHAÎNE</div>
-              <h1 className="home-title native-title">Higher<span>/</span><br/>Lower</h1>
+              <h1 className="home-title native-title">Whichly</h1>
               <p>Deux choix. Une seule bonne réponse.<br/>Jusqu’où ira ta série ?</p>
               <div className="record-pill"><Trophy size={18}/><span>Meilleur score</span><strong>{best}</strong></div>
               <button className="play-button primary-home" onClick={startGame}>Jouer <ArrowRight size={20}/></button>
               <button className="stats-shortcut" onClick={() => setScreen('stats')}><BarChart3 size={17}/> Voir mes statistiques</button>
             </div>
 
-            <footer className="home-footer">{questions.length.toLocaleString('fr-FR')} comparaisons disponibles</footer>
+            <footer className="home-footer">Whichly · v{APP_VERSION} · {questions.length.toLocaleString('fr-FR')} comparaisons</footer>
           </div>
         )}
 
@@ -363,6 +368,7 @@ function App() {
                 </div>
               )) : <div className="empty-stats">Joue quelques parties pour faire apparaître tes forces et faiblesses.</div>}
             </section>
+            <div className="version-label">Whichly · v{APP_VERSION}</div>
           </div>
         )}
       </section>
