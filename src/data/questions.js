@@ -38,25 +38,30 @@ const groups = [
 ]
 
 const offsets = [1, 2, 3, 5, 7]
-const generated = []
-let id = 1
+const balanced = []
 
 for (const group of groups) {
   const used = new Set()
+  const groupQuestions = []
+
   for (const offset of offsets) {
     for (let i = 0; i < group.items.length; i++) {
       const j = (i + offset) % group.items.length
       if (i === j) continue
+
       const key = [Math.min(i, j), Math.max(i, j)].join('-')
       if (used.has(key)) continue
       used.add(key)
+
       const [leftLabel, leftValue] = group.items[i]
       const [rightLabel, rightValue] = group.items[j]
       if (leftValue === rightValue) continue
-      generated.push({
-        id: `q${String(id++).padStart(3, '0')}`,
+
+      groupQuestions.push({
         category: group.category,
-        prompt: group.category === 'Année de première sortie' ? 'Lequel est sorti le plus récemment ?' : 'Lequel a la valeur la plus élevée ?',
+        prompt: group.category === 'Année de première sortie'
+          ? 'Lequel est sorti le plus récemment ?'
+          : 'Lequel a la valeur la plus élevée ?',
         left: { label: leftLabel, value: leftValue },
         right: { label: rightLabel, value: rightValue },
         answer: leftValue > rightValue ? 'left' : 'right',
@@ -64,7 +69,13 @@ for (const group of groups) {
       })
     }
   }
+
+  balanced.push(...groupQuestions.slice(0, 27))
 }
 
-export const questions = generated.slice(0, 240)
+export const questions = balanced.slice(0, 240).map((question, index) => ({
+  id: `q${String(index + 1).padStart(3, '0')}`,
+  ...question
+}))
+
 export default questions
