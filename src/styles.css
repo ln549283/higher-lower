@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Space+Grotesk:wght@600;700&display=swap');
+
+:root { font-family: Inter, system-ui, sans-serif; color: #f8f8fb; background: #09090d; font-synthesis: none; }
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: #09090d; }
+button { font: inherit; }
+
+.app-shell { min-height: 100vh; display: grid; place-items: center; overflow: hidden; position: relative; background: radial-gradient(circle at 20% 15%, rgba(111,72,255,.20), transparent 26rem), radial-gradient(circle at 85% 85%, rgba(0,224,190,.12), transparent 22rem), #09090d; }
+.noise { position: fixed; inset: 0; pointer-events: none; opacity: .18; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E"); }
+.game { width: min(100%, 520px); min-height: 100vh; padding: max(22px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; align-items: center; position: relative; z-index: 1; }
+.topbar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 38px; }
+.brand { font-family: 'Space Grotesk'; font-size: 15px; font-weight: 700; letter-spacing: .06em; display: flex; align-items: center; gap: 2px; }
+.brand span { color: #7c5cff; }
+.brand-dot { width: 8px; height: 8px; border-radius: 50%; background: #7c5cff; margin-right: 8px; box-shadow: 0 0 18px #7c5cff; }
+.best { display: flex; gap: 7px; align-items: center; padding: 8px 11px; border-radius: 12px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); font-weight: 700; }
+.streak { display: flex; align-items: baseline; gap: 7px; margin-bottom: 22px; color: #b9b8c2; }
+.streak svg { color: #ffb647; align-self: center; }
+.streak strong { font-family: 'Space Grotesk'; color: white; font-size: 24px; }
+.streak span { font-size: 10px; letter-spacing: .16em; font-weight: 800; }
+.category { font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: #8f88ff; padding: 7px 10px; border: 1px solid rgba(124,92,255,.25); border-radius: 999px; background: rgba(124,92,255,.08); text-align: center; }
+h1 { font-family: 'Space Grotesk'; text-align: center; font-size: clamp(28px, 7vw, 38px); line-height: 1.04; margin: 18px 0 28px; max-width: 400px; }
+.versus { width: 100%; display: grid; grid-template-columns: 1fr; gap: 12px; position: relative; }
+.card { min-height: 164px; border: 1px solid rgba(255,255,255,.09); border-radius: 24px; color: white; padding: 22px; text-align: left; cursor: pointer; position: relative; overflow: hidden; background: linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.035)); transition: transform .14s ease, border-color .14s ease, background .14s ease; }
+.card:active { transform: scale(.985); }
+.card::after { content: ''; position: absolute; inset: auto -45px -65px auto; width: 160px; height: 160px; border-radius: 50%; background: radial-gradient(circle, rgba(124,92,255,.18), transparent 65%); }
+.card-right::after { background: radial-gradient(circle, rgba(0,224,190,.14), transparent 65%); }
+.pick-icon { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 12px; background: rgba(124,92,255,.14); color: #9d89ff; margin-bottom: 18px; }
+.card-right .pick-icon { background: rgba(0,224,190,.11); color: #4ae7cd; }
+.label { display: block; font-family: 'Space Grotesk'; font-size: 24px; font-weight: 700; padding-right: 28px; }
+.tap { display: block; margin-top: 9px; font-size: 10px; font-weight: 800; letter-spacing: .13em; color: #777681; }
+.value { display: block; margin-top: 8px; font-family: 'Space Grotesk'; color: #c7c6ce; font-weight: 700; }
+.vs { position: absolute; left: 50%; top: 50%; z-index: 3; transform: translate(-50%,-50%); width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: #121219; border: 1px solid rgba(255,255,255,.12); color: #a4a2ab; font-size: 11px; font-weight: 800; }
+.is-correct .card { border-color: rgba(53,222,166,.40); background: rgba(53,222,166,.08); }
+.is-wrong .card { border-color: rgba(255,87,119,.34); }
+.report-link { margin-top: 22px; background: none; border: 0; color: #73727d; display: flex; gap: 7px; align-items: center; cursor: pointer; font-size: 12px; }
+.microcopy { margin-top: 18px; color: #5f5e67; font-size: 12px; text-align: center; }
+footer { margin-top: auto; padding-top: 30px; color: #494851; font-size: 10px; text-align: center; }
+.gameover { margin: auto 0; width: 100%; text-align: center; }
+.gameover-icon { width: 70px; height: 70px; margin: 0 auto 16px; border-radius: 22px; display: grid; place-items: center; background: rgba(255,182,71,.1); color: #ffb647; border: 1px solid rgba(255,182,71,.15); }
+.gameover > p { color: #83818c; letter-spacing: .15em; font-size: 11px; font-weight: 800; }
+.final-score { font-family: 'Space Grotesk'; font-size: 96px; line-height: 1; font-weight: 700; letter-spacing: -.06em; }
+.gameover h2 { margin: 12px 0 28px; font-family: 'Space Grotesk'; }
+.primary, .secondary { width: 100%; border-radius: 16px; padding: 16px; display: flex; align-items: center; justify-content: center; gap: 9px; font-weight: 800; cursor: pointer; }
+.primary { background: #7c5cff; color: #fff; border: 0; box-shadow: 0 12px 34px rgba(124,92,255,.25); }
+.secondary { margin-top: 10px; background: transparent; color: #8b8994; border: 1px solid rgba(255,255,255,.08); }
+.modal-backdrop { position: fixed; inset: 0; z-index: 20; display: grid; place-items: end center; background: rgba(0,0,0,.65); backdrop-filter: blur(8px); }
+.modal { width: min(100%,520px); border-radius: 26px 26px 0 0; padding: 26px 22px max(26px, env(safe-area-inset-bottom)); background: #14141b; border: 1px solid rgba(255,255,255,.08); position: relative; }
+.close { position: absolute; right: 18px; top: 18px; border: 0; background: #20202a; color: #aaa8b2; border-radius: 12px; width: 38px; height: 38px; }
+.eyebrow { color: #8f88ff; font-size: 10px; font-weight: 800; letter-spacing: .14em; }
+.modal h3 { font-family: 'Space Grotesk'; font-size: 25px; margin: 10px 48px 8px 0; }
+.modal p { color: #9997a3; line-height: 1.5; margin: 0 0 22px; font-size: 14px; }
+@media (min-height: 760px) { .card { min-height: 178px; } }
