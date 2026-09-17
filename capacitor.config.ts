@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.loic.highlowstreak',
-  appName: 'Higher Lower Streak',
+  appId: 'com.loic.whichly',
+  appName: 'Whichly',
   webDir: 'dist',
   bundledWebRuntime: false,
 };
