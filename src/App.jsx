@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, ArrowRight, BarChart3, Check, Download, Flag, RotateCcw, Trophy, X } from 'lucide-react'
+import { ArrowLeft, ArrowRight, BarChart3, Check, Download, Flag, RotateCcw, ShieldCheck, Trophy, X } from 'lucide-react'
 import questions from './data/questions.js'
-import { maybeShowDefeatAd, warmUpAds } from './ads.js'
+import { maybeShowDefeatAd, showPrivacyOptions, warmUpAds } from './ads.js'
 
 const APP_VERSION = '1.0.0'
 
@@ -105,6 +105,7 @@ function App() {
   const [reportDetails, setReportDetails] = useState('')
   const [installPrompt, setInstallPrompt] = useState(null)
   const [runAnswers, setRunAnswers] = useState(0)
+  const [privacyOptionsRequired, setPrivacyOptionsRequired] = useState(false)
 
   const q = deck[index % deck.length]
   const reportTarget = failedQuestion || q
@@ -123,6 +124,12 @@ function App() {
     localStorage.setItem('hl-stats', JSON.stringify(stats))
   }, [stats])
 
+  useEffect(() => {
+    warmUpAds().then(status => {
+      setPrivacyOptionsRequired(Boolean(status?.privacyOptionsRequired))
+    })
+  }, [])
+
   async function installApp() {
     if (!installPrompt) return
     await installPrompt.prompt()
@@ -130,7 +137,6 @@ function App() {
   }
 
   function startGame() {
-    void warmUpAds()
     setDeck(buildDeck(questions))
     setIndex(0)
     setStreak(0)
@@ -181,6 +187,14 @@ function App() {
     }
     setIsNewRecord(brokeRecord)
     setFailedQuestion(q)
+    finishGame()
+
+    window.setTimeout(async () => {
+      await maybeShowDefeatAd()
+      setScreen('gameover')
+      setFeedback(null)
+      setChosenSide(null)
+    }, 1800)
   }
 
   function finishGame() {
@@ -188,15 +202,6 @@ function App() {
   }
 
   async function continueGame() {
-    if (feedback === 'wrong') {
-      finishGame()
-      await maybeShowDefeatAd()
-      setScreen('gameover')
-      setFeedback(null)
-      setChosenSide(null)
-      return
-    }
-
     let nextIndex = index + 1
     if (nextIndex >= deck.length) {
       setDeck(buildDeck(questions))
@@ -282,6 +287,9 @@ function App() {
               <div className="record-pill"><Trophy size={18}/><span>Meilleur score</span><strong>{best}</strong></div>
               <button className="play-button primary-home" onClick={startGame}>Jouer <ArrowRight size={20}/></button>
               <button className="stats-shortcut" onClick={() => setScreen('stats')}><BarChart3 size={17}/> Voir mes statistiques</button>
+              {privacyOptionsRequired && (
+                <button className="stats-shortcut" onClick={showPrivacyOptions}><ShieldCheck size={17}/> Choix de confidentialité</button>
+              )}
             </div>
 
             <footer className="home-footer">Whichly · v{APP_VERSION} · {questions.length.toLocaleString('fr-FR')} comparaisons</footer>
@@ -322,8 +330,10 @@ function App() {
               <div className="versus-dot">VS</div>
             </div>
 
-            {feedback ? (
-              <button className="continue-button" onClick={continueGame}>{feedback === 'correct' ? 'Continuer' : 'Voir le résultat'} <ArrowRight size={19}/></button>
+            {feedback === 'correct' ? (
+              <button className="continue-button" onClick={continueGame}>Continuer <ArrowRight size={19}/></button>
+            ) : feedback === 'wrong' ? (
+              <div className="ad-transition-note">Fin de série…</div>
             ) : (
               <button className="report-link" onClick={openReport}><Flag size={15}/> Signaler cette question</button>
             )}
