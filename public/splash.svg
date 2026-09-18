@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <rect width="1080" height="1920" fill="#F4F8FC"/>
+  <g transform="translate(380 690)">
+    <rect width="320" height="320" rx="82" fill="#17314E"/>
+    <path d="M80 92 129 232 160 148 191 232 240 92" fill="none" stroke="#FFFFFF" stroke-width="38" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="80" cy="92" r="18" fill="#7A82F6"/>
+    <circle cx="240" cy="92" r="18" fill="#59C77B"/>
+  </g>
+  <text x="540" y="1090" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="86" font-weight="800" fill="#142238">Whichly</text>
+  <text x="540" y="1160" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="26" font-weight="700" letter-spacing="9" fill="#8190A1">NIBYLO GAMES</text>
+</svg>
