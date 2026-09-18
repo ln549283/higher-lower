@@ -3,24 +3,34 @@ import { Capacitor } from '@capacitor/core'
 const MIN_GAMES_BEFORE_ADS = 2
 const DEFEATS_BETWEEN_ADS = 3
 const MIN_MS_BETWEEN_ADS = 180000
+const GOOGLE_TEST_INTERSTITIAL_ANDROID = 'ca-app-pub-3940256099942544/1033173712'
+const TEST_MODE = import.meta.env.VITE_ADMOB_TEST_MODE !== 'false'
 
 let initialized = false
 let canRequestAds = false
+let privacyOptionsRequired = false
 let prepared = false
 let adMobApi = null
 
 function getAdUnitId() {
   const platform = Capacitor.getPlatform()
-  if (platform === 'android') return import.meta.env.VITE_ADMOB_INTERSTITIAL_ANDROID || ''
+  if (platform === 'android') {
+    return TEST_MODE ? GOOGLE_TEST_INTERSTITIAL_ANDROID : (import.meta.env.VITE_ADMOB_INTERSTITIAL_ANDROID || '')
+  }
   if (platform === 'ios') return import.meta.env.VITE_ADMOB_INTERSTITIAL_IOS || ''
   return ''
 }
 
 async function ensureAdMob() {
-  if (!Capacitor.isNativePlatform()) return false
-  if (initialized) return canRequestAds
+  if (!Capacitor.isNativePlatform()) {
+    return { canRequestAds: false, privacyOptionsRequired: false, isNative: false }
+  }
 
-  const { AdMob, AdmobConsentStatus } = await import('@capacitor-community/admob')
+  if (initialized) {
+    return { canRequestAds, privacyOptionsRequired, isNative: true }
+  }
+
+  const { AdMob, AdmobConsentStatus, PrivacyOptionsRequirementStatus } = await import('@capacitor-community/admob')
   adMobApi = AdMob
   await AdMob.initialize()
 
@@ -31,12 +41,15 @@ async function ensureAdMob() {
 
   initialized = true
   canRequestAds = Boolean(consentInfo.canRequestAds)
-  return canRequestAds
+  privacyOptionsRequired = consentInfo.privacyOptionsRequirementStatus === PrivacyOptionsRequirementStatus.REQUIRED
+
+  return { canRequestAds, privacyOptionsRequired, isNative: true }
 }
 
 async function prepareInterstitial() {
   const adId = getAdUnitId()
-  if (!adId || !(await ensureAdMob())) return false
+  const status = await ensureAdMob()
+  if (!adId || !status.canRequestAds) return false
 
   try {
     await adMobApi.prepareInterstitial({ adId })
@@ -51,9 +64,24 @@ async function prepareInterstitial() {
 
 export async function warmUpAds() {
   try {
-    if (await ensureAdMob()) await prepareInterstitial()
+    const status = await ensureAdMob()
+    if (status.canRequestAds) await prepareInterstitial()
+    return status
   } catch (error) {
     console.warn('Whichly: initialisation AdMob ignorée.', error)
+    return { canRequestAds: false, privacyOptionsRequired: false, isNative: Capacitor.isNativePlatform() }
+  }
+}
+
+export async function showPrivacyOptions() {
+  try {
+    const status = await ensureAdMob()
+    if (!status.isNative || !privacyOptionsRequired || !adMobApi) return false
+    await adMobApi.showPrivacyOptionsForm()
+    return true
+  } catch (error) {
+    console.warn('Whichly: options de confidentialité indisponibles.', error)
+    return false
   }
 }
 
@@ -68,7 +96,8 @@ export async function maybeShowDefeatAd() {
   if (Date.now() - lastShown < MIN_MS_BETWEEN_ADS) return false
 
   try {
-    if (!(await ensureAdMob())) return false
+    const status = await ensureAdMob()
+    if (!status.canRequestAds) return false
     if (!prepared && !(await prepareInterstitial())) return false
 
     await adMobApi.showInterstitial()
