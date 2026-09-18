@@ -1,0 +1,66 @@
+workflows:
+  whichly-android-test:
+    name: Whichly Android - Test
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+
+    environment:
+      node: lts
+      java: 21
+      vars:
+        VITE_ADMOB_TEST_MODE: "true"
+        ADMOB_APP_ID_ANDROID: "ca-app-pub-4973119425605161~9476551219"
+
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm ci
+
+      - name: Build web app
+        script: |
+          npm run build
+
+      - name: Generate Android project
+        script: |
+          npx cap add android
+          npx cap sync android
+
+      - name: Configure AdMob Android App ID
+        script: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          manifest = Path("android/app/src/main/AndroidManifest.xml")
+          text = manifest.read_text()
+
+          metadata = """        <meta-data
+              android:name="com.google.android.gms.ads.APPLICATION_ID"
+              android:value="@string/admob_app_id" />
+          """
+
+          if "com.google.android.gms.ads.APPLICATION_ID" not in text:
+              text = text.replace("</application>", metadata + "</application>")
+              manifest.write_text(text)
+
+          strings = Path("android/app/src/main/res/values/strings.xml")
+          text = strings.read_text()
+          value = '<string name="admob_app_id">ca-app-pub-4973119425605161~9476551219</string>'
+
+          if 'name="admob_app_id"' not in text:
+              text = text.replace("</resources>", f"    {value}\n</resources>")
+              strings.write_text(text)
+          PY
+
+      - name: Set Android SDK location
+        script: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
+
+      - name: Build debug APK
+        script: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+    artifacts:
+      - android/app/build/outputs/apk/debug/*.apk
+      - android/app/build/reports/**/*
