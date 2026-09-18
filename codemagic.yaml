@@ -5,10 +5,11 @@ workflows:
     instance_type: mac_mini_m2
 
     environment:
-      node: lts
+      node: 24
       java: 21
       vars:
         VITE_ADMOB_TEST_MODE: "true"
+        VITE_ADMOB_INTERSTITIAL_ANDROID: "ca-app-pub-4973119425605161/7077171479"
         ADMOB_APP_ID_ANDROID: "ca-app-pub-4973119425605161~9476551219"
 
     scripts:
