@@ -5,6 +5,17 @@ import { maybeShowDefeatAd, warmUpAds } from './ads.js'
 
 const APP_VERSION = '1.0.0'
 
+function WhichlyMark({ className = '' }) {
+  return (
+    <svg className={className} viewBox="0 0 52 52" aria-hidden="true">
+      <path d="M8 13 19.5 39 26 25.5 32.5 39 44 13" fill="none" stroke="currentColor" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
+      <circle cx="8" cy="13" r="3.2" className="mark-dot mark-dot-left"/>
+      <circle cx="44" cy="13" r="3.2" className="mark-dot mark-dot-right"/>
+    </svg>
+  )
+}
+
+
 function shuffle(items) {
   const copy = [...items]
   for (let i = copy.length - 1; i > 0; i--) {
@@ -257,7 +268,7 @@ function App() {
         {screen === 'home' && (
           <div className="home-screen home-native">
             <header className="home-top">
-              <div className="mini-brand">W</div>
+              <div className="mini-brand" aria-label="Whichly"><WhichlyMark className="mini-brand-mark"/></div>
               <div className="home-actions">
                 {installPrompt && <button className="icon-button" onClick={installApp} aria-label="Installer"><Download size={19}/></button>}
                 <button className="icon-button" onClick={() => setScreen('stats')} aria-label="Statistiques"><BarChart3 size={19}/></button>
