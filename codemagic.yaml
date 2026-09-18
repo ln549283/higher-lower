@@ -65,3 +65,102 @@ workflows:
     artifacts:
       - android/app/build/outputs/apk/debug/*.apk
       - android/app/build/reports/**/*
+
+  whichly-android-release:
+    name: Whichly Android - Signed AAB
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+
+    environment:
+      android_signing:
+        - whichly-upload
+      node: 24
+      java: 21
+      vars:
+        VITE_ADMOB_TEST_MODE: "true"
+        VITE_ADMOB_INTERSTITIAL_ANDROID: "ca-app-pub-4973119425605161/7077171479"
+        ADMOB_APP_ID_ANDROID: "ca-app-pub-4973119425605161~9476551219"
+
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm install
+
+      - name: Build web app
+        script: |
+          npm run build
+
+      - name: Generate Android project
+        script: |
+          npx cap add android
+          npx cap sync android
+
+      - name: Configure AdMob Android App ID
+        script: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          manifest = Path("android/app/src/main/AndroidManifest.xml")
+          text = manifest.read_text()
+
+          metadata = """        <meta-data
+              android:name="com.google.android.gms.ads.APPLICATION_ID"
+              android:value="@string/admob_app_id" />
+          """
+
+          if "com.google.android.gms.ads.APPLICATION_ID" not in text:
+              text = text.replace("</application>", metadata + "</application>")
+              manifest.write_text(text)
+
+          strings = Path("android/app/src/main/res/values/strings.xml")
+          text = strings.read_text()
+          value = '<string name="admob_app_id">ca-app-pub-4973119425605161~9476551219</string>'
+
+          if 'name="admob_app_id"' not in text:
+              text = text.replace("</resources>", f"    {value}\n</resources>")
+              strings.write_text(text)
+          PY
+
+      - name: Configure release signing
+        script: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          gradle = Path("android/app/build.gradle")
+          text = gradle.read_text()
+
+          signing_block = """
+              signingConfigs {
+                  release {
+                      storeFile file(System.getenv("CM_KEYSTORE_PATH"))
+                      storePassword System.getenv("CM_KEYSTORE_PASSWORD")
+                      keyAlias System.getenv("CM_KEY_ALIAS")
+                      keyPassword System.getenv("CM_KEY_PASSWORD")
+                  }
+              }
+          """
+
+          if "signingConfigs {" not in text:
+              text = text.replace("    buildTypes {", signing_block + "\n    buildTypes {")
+
+          marker = "        release {"
+          if marker in text and "signingConfig signingConfigs.release" not in text:
+              text = text.replace(marker, marker + "\n            signingConfig signingConfigs.release", 1)
+
+          gradle.write_text(text)
+          PY
+
+      - name: Set Android SDK location
+        script: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
+
+      - name: Build signed release AAB
+        script: |
+          cd android
+          chmod +x gradlew
+          ./gradlew bundleRelease
+
+    artifacts:
+      - android/app/build/outputs/bundle/release/*.aab
+      - android/app/build/outputs/mapping/release/**/*
+      - android/app/build/reports/**/*
