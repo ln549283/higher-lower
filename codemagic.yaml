@@ -129,8 +129,7 @@ workflows:
           gradle = Path("android/app/build.gradle")
           text = gradle.read_text()
 
-          signing_block = """
-              signingConfigs {
+          signing_block = """    signingConfigs {
                   release {
                       storeFile file(System.getenv("CM_KEYSTORE_PATH"))
                       storePassword System.getenv("CM_KEYSTORE_PASSWORD")
@@ -138,14 +137,18 @@ workflows:
                       keyPassword System.getenv("CM_KEY_PASSWORD")
                   }
               }
+
           """
 
           if "signingConfigs {" not in text:
-              text = text.replace("    buildTypes {", signing_block + "\n    buildTypes {")
+              text = text.replace("    buildTypes {", signing_block + "    buildTypes {", 1)
 
-          marker = "        release {"
-          if marker in text and "signingConfig signingConfigs.release" not in text:
-              text = text.replace(marker, marker + "\n            signingConfig signingConfigs.release", 1)
+          target = "    buildTypes {\n        release {"
+          replacement = "    buildTypes {\n        release {\n            signingConfig signingConfigs.release"
+          if "signingConfig signingConfigs.release" not in text:
+              if target not in text:
+                  raise SystemExit("Could not find buildTypes release block in android/app/build.gradle")
+              text = text.replace(target, replacement, 1)
 
           gradle.write_text(text)
           PY
